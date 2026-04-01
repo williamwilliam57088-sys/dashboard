@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>麦迪个人运营看板</title>
+  <style>
+    :root {
+      --bg: #eef4ff;
+      --panel: rgba(255,255,255,0.82);
+      --panel-strong: #ffffff;
+      --text: #18212f;
+      --muted: #667085;
+      --line: rgba(148, 163, 184, 0.22);
+      --brand: #4f46e5;
+      --brand-2: #7c3aed;
+      --good: #059669;
+      --bad: #dc2626;
+      --warn: #d97706;
+      --soft-blue: #eef2ff;
+      --soft-green: #ecfdf5;
+      --soft-red: #fef2f2;
+      --soft-yellow: #fffbeb;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+      --shadow-soft: 0 8px 24px rgba(79, 70, 229, 0.10);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(99, 102, 241, 0.16), transparent 26%),
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 22%),
+        linear-gradient(180deg, #f7faff 0%, #f3f7ff 100%);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 30px 28px 48px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.92), rgba(59,130,246,0.86) 55%, rgba(14,165,233,0.82));
+      color: #fff;
+      box-shadow: 0 22px 60px rgba(79, 70, 229, 0.22);
+    }
+
+    .title-wrap h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.88);
+      font-size: 14px;
+      line-height: 1.75;
+      max-width: 760px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filters-bar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+
+    .filters-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filters-row label {
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 52px;
+    }
+
+    .filters-row input,
+    .filters-row select,
+    .filters-row textarea {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      min-width: 140px;
+    }
+
+    .filters-row input[type="date"] { min-width: 170px; }
+    .filters-row input[type="text"] { min-width: 220px; flex: 1; }
+
+    .summary-box {
+      white-space: pre-wrap;
+      line-height: 1.85;
+      font-size: 14px;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(245,247,255,0.95));
+      border: 1px dashed rgba(99,102,241,0.28);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    button, .file-label {
+      border: 0;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: var(--shadow-soft);
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    button:hover, .file-label:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(79, 70, 229, 0.18);
+    }
+
+    select.model-select {
+      border: 1px solid rgba(255,255,255,0.26);
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 14px;
+      box-shadow: none;
+      cursor: pointer;
+      min-width: 180px;
+      backdrop-filter: blur(10px);
+    }
+
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-label input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .ghost {
+      background: rgba(255,255,255,0.92);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.55);
+      box-shadow: none;
+    }
+
+    .ghost:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .status-bar {
+      background: rgba(255,255,255,0.74);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 18px;
+      padding: 15px 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 14px;
+      backdrop-filter: blur(12px);
+    }
+
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .badge.good { color: var(--good); background: var(--soft-green); }
+    .badge.bad { color: var(--bad); background: var(--soft-red); }
+    .badge.warn { color: var(--warn); background: var(--soft-yellow); }
+
+    .grid-5, .grid-3, .grid-2 {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .grid-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.68);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      min-width: 0;
+      backdrop-filter: blur(14px);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .kpi-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .trend-up { color: var(--good); font-weight: 700; }
+    .trend-down { color: var(--bad); font-weight: 700; }
+    .trend-flat { color: var(--warn); font-weight: 700; }
+
+    .chart-wrap {
+      height: 290px;
+      position: relative;
+    }
+
+    svg.chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .chart-caption {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+    }
+
+    tbody tr:hover { background: #fafbff; }
+
+    .rank-badge {
+      display: inline-flex;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      align-items: center;
+      justify-content: center;
+      background: var(--soft-blue);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .small-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,255,0.98));
+      border: 1px solid rgba(226,232,240,0.8);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+
+    .mini-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .mini-value {
+      font-weight: 800;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .help-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .muted { color: var(--muted); }
+    .right { text-align: right; }
+    .nowrap { white-space: nowrap; }
+    .ellipsis {
+      max-width: 0;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1200px) {
+      .grid-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .small-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+      .grid-5, .grid-3, .grid-2, .small-grid { grid-template-columns: 1fr; }
+      .container { padding: 16px; }
+      .header { padding: 18px; border-radius: 22px; }
+      .title-wrap h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title-wrap">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);font-size:12px;font-weight:700;margin-bottom:12px;">PERSONAL DASHBOARD</div>
+        <h1>麦迪个人运营看板</h1>
+        <div class="subtitle">
+          聚焦发布完成度、内容表现、趋势变化与每日摘要。界面已优化为更清爽的个人管理视图，支持筛选、趋势切换、上传与导出。
+        </div>
+      </div>
+      <div class="toolbar">
+        <select id="modelSelect" class="model-select" aria-label="选择模型"></select>
+        <button id="downloadTemplateBtn" class="ghost">下载当前模型模板CSV</button>
+        <button id="exportCSVBtn" class="ghost">导出当前模型CSV</button>
+        <button id="clearModelBtn" class="ghost">清空当前模型数据</button>
+        <select id="trendGranularity" class="model-select" aria-label="趋势粒度">
+          <option value="day">按天趋势</option>
+          <option value="week">按周趋势</option>
+          <option value="month">按月趋势</option>
+        </select>
+        <button id="reloadBtn" class="ghost">重新读取 当前模型文件</button>
+        <label class="file-label">
+          上传 CSV
+          <input id="fileInput" type="file" accept=".csv,text/csv" />
+        </label>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="modelText">模型：-</span>
+      <span id="sourceText">数据源：正在加载…</span>
+      <span id="dateText">统计日期：-</span>
+      <span id="recordText">记录数：-</span>
+      <span id="goalBadge" class="badge warn">目标完成度待计算</span>
+    </div>
+
+    <div class="filters-bar">
+      <div class="filters-row">
+        <label>开始日期</label>
+        <input id="startDateInput" type="date" />
+        <label>结束日期</label>
+        <input id="endDateInput" type="date" />
+        <label>平台</label>
+        <select id="platformFilter"><option value="">全部平台</option></select>
+        <label>账号</label>
+        <select id="accountFilter"><option value="">全部账号</option></select>
+      </div>
+      <div class="filters-row">
+        <label>关键词</label>
+        <input id="keywordFilter" type="text" placeholder="搜索标题 / ID / 平台 / 账号" />
+        <button id="applyFilterBtn" class="ghost">应用筛选</button>
+        <button id="resetFilterBtn" class="ghost">重置筛选</button>
+      </div>
+    </div>
+
+    <div id="errorBox" class="card hidden">
+      <div class="section-title">数据读取提示</div>
+      <div id="errorText" class="muted"></div>
+      <div class="help-box">
+        若直接双击本地 HTML 打开，浏览器可能阻止读取相对路径文件。此时可直接点击右上角“上传 CSV”，或通过本地服务打开当前文件夹后访问该页面。
+      </div>
+    </div>
+
+    <div class="grid-5">
+      <div class="card">
+        <div class="kpi-label">今日发布量</div>
+        <div id="kpiPosts" class="kpi-value">-</div>
+        <div class="kpi-meta">
+          <span>目标 &gt; 12</span>
+          <span id="postsVsYesterday">-</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">今日总观看量</div>
+        <div id="kpiViews" class="kpi-value">-</div>
+        <div class="kpi-meta">
+          <span>目标 &gt; 120,000</span>
+          <span id="viewsVsYesterday">-</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">今日总评论量</div>
+        <div id="kpiComments" class="kpi-value">-</div>
+        <div class="kpi-meta">
+          <span>目标 &gt; 100</span>
+          <span id="commentsVsYesterday">-</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">单帖平均观看量</div>
+        <div id="kpiAvgViews" class="kpi-value">-</div>
+        <div class="kpi-meta">
+          <span>目标 10,000+</span>
+          <span id="avgViewsGoal">-</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">单帖平均评论量</div>
+        <div id="kpiAvgComments" class="kpi-value">-</div>
+        <div class="kpi-meta">
+          <span>目标 5-10</span>
+          <span id="avgCommentsGoal">-</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">基础数据概览</div>
+      <div class="small-grid">
+        <div class="mini-card">
+          <div class="mini-label">昨日发布数量</div>
+          <div id="miniYesterdayPosts" class="mini-value">-</div>
+          <div id="miniYesterdayDate" class="muted">-</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">本周发布数量</div>
+          <div id="miniWeekPosts" class="mini-value">-</div>
+          <div id="miniWeekRange" class="muted">-</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">本月发布数量</div>
+          <div id="miniMonthPosts" class="mini-value">-</div>
+          <div id="miniMonthRange" class="muted">-</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">本月总观看 / 总评论</div>
+          <div id="miniMonthEffect" class="mini-value">-</div>
+          <div id="miniMonthAvg" class="muted">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="section-title">发布量环比</div>
+        <table>
+          <thead>
+            <tr><th>维度</th><th class="right">数值</th><th class="right">环比</th></tr>
+          </thead>
+          <tbody id="publishComparison"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="section-title">观看量环比</div>
+        <table>
+          <thead>
+            <tr><th>维度</th><th class="right">数值</th><th class="right">环比</th></tr>
+          </thead>
+          <tbody id="viewComparison"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="section-title">评论量环比</div>
+        <table>
+          <thead>
+            <tr><th>维度</th><th class="right">数值</th><th class="right">环比</th></tr>
+          </thead>
+          <tbody id="commentComparison"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">自动日报摘要</div>
+      <div id="dailySummary" class="summary-box">-</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div id="postsChartTitle" class="section-title">近 7 天发布趋势</div>
+        <div class="chart-wrap"><svg id="postsChart" class="chart"></svg></div>
+        <div class="chart-caption">用于判断发布任务是否稳定完成。</div>
+      </div>
+      <div class="card">
+        <div id="viewsChartTitle" class="section-title">近 7 天观看趋势</div>
+        <div class="chart-wrap"><svg id="viewsChart" class="chart"></svg></div>
+        <div class="chart-caption">用于判断社区基础曝光与内容热度变化。</div>
+      </div>
+      <div class="card">
+        <div id="commentsChartTitle" class="section-title">近 7 天评论趋势</div>
+        <div class="chart-wrap"><svg id="commentsChart" class="chart"></svg></div>
+        <div class="chart-caption">用于判断互动率和内容参与度走势。</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="section-title">今日观看量 TOP</div>
+        <table>
+          <thead>
+            <tr><th style="width:56px;">排名</th><th>帖子</th><th class="right">观看量</th><th class="right">评论量</th></tr>
+          </thead>
+          <tbody id="topViewsTable"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="section-title">今日评论量 TOP</div>
+        <table>
+          <thead>
+            <tr><th style="width:56px;">排名</th><th>帖子</th><th class="right">评论量</th><th class="right">观看量</th></tr>
+          </thead>
+          <tbody id="topCommentsTable"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="section-title">低表现帖子</div>
+        <table>
+          <thead>
+            <tr><th style="width:56px;">排名</th><th>帖子</th><th class="right">观看量</th><th class="right">评论量</th></tr>
+          </thead>
+          <tbody id="lowPerformersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MODELS = [
+      {
+        key: 'base',
+        label: '默认模型',
+        relativeCSVPath: 'data/运营日报.csv',
+        templateCSV: `date,title,id,views,comments
+2026-03-24,默认-帖子A1,p_base_1,8000,60
+2026-03-24,默认-帖子A2,p_base_2,12000,80
+2026-03-25,默认-帖子B1,p_base_3,9500,70
+2026-03-25,默认-帖子B2,p_base_4,15000,95
+2026-03-26,默认-帖子C1,p_base_5,11000,85
+2026-03-26,默认-帖子C2,p_base_6,17000,110
+2026-03-27,默认-帖子D1,p_base_7,13000,95
+2026-03-27,默认-帖子D2,p_base_8,19000,125
+2026-03-28,默认-帖子E1,p_base_9,14000,105
+2026-03-28,默认-帖子E2,p_base_10,21000,150
+2026-03-29,默认-帖子F1,p_base_11,15500,120
+2026-03-29,默认-帖子F2,p_base_12,23500,165
+2026-03-30,默认-帖子G1,p_base_13,17500,135
+2026-03-30,默认-帖子G2,p_base_14,26000,190`
+      },
+      {
+        key: 'model2',
+        label: '模型2（增长）',
+        relativeCSVPath: 'data/运营日报_model2.csv',
+        templateCSV: `date,title,id,views,comments
+2026-03-24,模型2-帖子A1,p_m2_1,7000,50
+2026-03-24,模型2-帖子A2,p_m2_2,9000,65
+2026-03-25,模型2-帖子B1,p_m2_3,10000,72
+2026-03-25,模型2-帖子B2,p_m2_4,13000,88
+2026-03-26,模型2-帖子C1,p_m2_5,12000,85
+2026-03-26,模型2-帖子C2,p_m2_6,16000,105
+2026-03-27,模型2-帖子D1,p_m2_7,14000,98
+2026-03-27,模型2-帖子D2,p_m2_8,18500,125
+2026-03-28,模型2-帖子E1,p_m2_9,16000,115
+2026-03-28,模型2-帖子E2,p_m2_10,21000,150
+2026-03-29,模型2-帖子F1,p_m2_11,18000,130
+2026-03-29,模型2-帖子F2,p_m2_12,25000,175
+2026-03-30,模型2-帖子G1,p_m2_13,20500,155
+2026-03-30,模型2-帖子G2,p_m2_14,29500,210`
+      },
+      {
+        key: 'model3',
+        label: '模型3（互动）',
+        relativeCSVPath: 'data/运营日报_model3.csv',
+        templateCSV: `date,title,id,views,comments
+2026-03-24,模型3-帖子A1,p_m3_1,6000,90
+2026-03-24,模型3-帖子A2,p_m3_2,8000,120
+2026-03-25,模型3-帖子B1,p_m3_3,7500,105
+2026-03-25,模型3-帖子B2,p_m3_4,9800,140
+2026-03-26,模型3-帖子C1,p_m3_5,9000,125
+2026-03-26,模型3-帖子C2,p_m3_6,11800,165
+2026-03-27,模型3-帖子D1,p_m3_7,11000,150
+2026-03-27,模型3-帖子D2,p_m3_8,14500,200
+2026-03-28,模型3-帖子E1,p_m3_9,12500,170
+2026-03-28,模型3-帖子E2,p_m3_10,16500,220
+2026-03-29,模型3-帖子F1,p_m3_11,14000,190
+2026-03-29,模型3-帖子F2,p_m3_12,19000,250
+2026-03-30,模型3-帖子G1,p_m3_13,16000,215
+2026-03-30,模型3-帖子G2,p_m3_14,23000,290`
+      }
+    ];
+
+    const STORAGE_PREFIX = 'shi-dashboard:v1:';
+    const DEFAULT_MODEL_KEY = 'base';
+
+    const KPI_TARGETS = {
+      posts: 12,
+      views: 120000,
+      comments: 100,
+      avgViews: 10000,
+      avgCommentsMin: 5,
+      avgCommentsMax: 10,
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    const state = {
+      rows: [],
+      normalized: [],
+      dayStats: [],
+      latestDay: null,
+      titleField: null,
+      dateField: null,
+      viewsField: null,
+      commentsField: null,
+      idField: null,
+      platformField: null,
+      accountField: null,
+      activeModelKey: DEFAULT_MODEL_KEY,
+      originalHeaders: [],
+      originalRecords: [],
+      originalCSVText: null,
+      filteredRecords: [],
+      filteredNormalized: [],
+      filters: { startDate: '', endDate: '', platform: '', account: '', keyword: '' },
+      trendGranularity: 'day',
+    };
+
+    function setError(message) {
+      el('errorText').textContent = message;
+      el('errorBox').classList.remove('hidden');
+    }
+
+    function clearError() {
+      el('errorBox').classList.add('hidden');
+      el('errorText').textContent = '';
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let i = 0;
+      let field = '';
+      let row = [];
+      let inQuotes = false;
+      while (i < text.length) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (inQuotes) {
+          if (char === '"' && next === '"') {
+            field += '"';
+            i += 2;
+            continue;
+          }
+          if (char === '"') {
+            inQuotes = false;
+            i++;
+            continue;
+          }
+          field += char;
+          i++;
+          continue;
+        }
+        if (char === '"') {
+          inQuotes = true;
+          i++;
+          continue;
+        }
+        if (char === ',') {
+          row.push(field);
+          field = '';
+          i++;
+          continue;
+        }
+        if (char === '\n') {
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = '';
+          i++;
+          continue;
+        }
+        if (char === '\r') {
+          i++;
+          continue;
+        }
+        field += char;
+        i++;
+      }
+      if (field.length || row.length) {
+        row.push(field);
+        rows.push(row);
+      }
+      return rows.filter(r => r.some(v => String(v).trim() !== ''));
+    }
+
+    function guessField(headers, patterns) {
+      for (const p of patterns) {
+        const found = headers.find(h => p.test(h));
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function toNumber(value) {
+      if (value == null) return 0;
+      const str = String(value).trim();
+      if (!str) return 0;
+      const normalized = str
+        .replace(/[,%\s]/g, '')
+        .replace(/，/g, '')
+        .replace(/,/g, '')
+        .replace(/万/g, '0000')
+        .replace(/w/ig, '0000')
+        .replace(/k/ig, '000');
+      const num = Number(normalized);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function parseDate(value) {
+      if (value == null) return null;
+      const raw = String(value).trim();
+      if (!raw) return null;
+      const s = raw.replace(/年|\//g, '-').replace(/月/g, '-').replace(/日/g, '').replace(/\./g, '-');
+      const d = new Date(s);
+      if (!Number.isNaN(d.getTime())) return d;
+      const m = raw.match(/(\d{4})[- ]?(\d{1,2})[- ]?(\d{1,2})/);
+      if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return null;
+    }
+
+    function formatDate(date) {
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '-';
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatMonth(date) {
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '-';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function startOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay() || 7;
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() - day + 1);
+      return d;
+    }
+
+    function endOfWeek(date) {
+      const d = startOfWeek(date);
+      d.setDate(d.getDate() + 6);
+      return d;
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function isSameDay(a, b) {
+      return formatDate(a) === formatDate(b);
+    }
+
+    function percentChange(curr, prev) {
+      if (!prev && !curr) return 0;
+      if (!prev) return 100;
+      return ((curr - prev) / prev) * 100;
+    }
+
+    function formatDelta(curr, prev) {
+      const pct = percentChange(curr, prev);
+      if (!Number.isFinite(pct)) return '<span class="trend-flat">-</span>';
+      const sign = pct > 0 ? '+' : '';
+      const cls = pct > 0 ? 'trend-up' : pct < 0 ? 'trend-down' : 'trend-flat';
+      const arrow = pct > 0 ? '↑' : pct < 0 ? '↓' : '→';
+      return `<span class="${cls}">${arrow} ${sign}${pct.toFixed(1)}%</span>`;
+    }
+
+    function formatNumber(num) {
+      const n = Number(num || 0);
+      return new Intl.NumberFormat('zh-CN').format(Math.round(n));
+    }
+
+    function formatCompact(num) {
+      const n = Number(num || 0);
+      if (Math.abs(n) >= 100000000) return `${(n / 100000000).toFixed(2)}亿`;
+      if (Math.abs(n) >= 10000) return `${(n / 10000).toFixed(1)}万`;
+      return formatNumber(n);
+    }
+
+    function aggregateByDay(rows) {
+      const map = new Map();
+      for (const row of rows) {
+        const key = formatDate(row.date);
+        if (!map.has(key)) {
+          map.set(key, { date: new Date(row.date), posts: 0, views: 0, comments: 0, rows: [] });
+        }
+        const item = map.get(key);
+        item.posts += 1;
+        item.views += row.views;
+        item.comments += row.comments;
+        item.rows.push(row);
+      }
+      return [...map.values()].sort((a, b) => a.date - b.date);
+    }
+
+    function sumStats(list) {
+      return list.reduce((acc, item) => {
+        acc.posts += item.posts || 0;
+        acc.views += item.views || 0;
+        acc.comments += item.comments || 0;
+        return acc;
+      }, { posts: 0, views: 0, comments: 0 });
+    }
+
+    function dayLabel(date) {
+      const d = new Date(date);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    }
+
+    function normalizeData(records) {
+      if (!records.length) throw new Error('CSV 中没有可用数据。');
+      const headers = Object.keys(records[0]);
+      state.dateField = guessField(headers, [/^(date|日期|发布时间|发帖时间|发布日)$/i, /时间/i]);
+      state.titleField = guessField(headers, [/^(title|标题|帖子标题|内容标题|帖子名称|内容名称)$/i, /标题|帖子|内容名/]);
+      state.viewsField = guessField(headers, [/^(views|view|播放量|观看量|浏览量|曝光量|阅读量)$/i, /观看|浏览|播放|阅读|曝光/]);
+      state.commentsField = guessField(headers, [/^(comments|comment|评论量|评论数)$/i, /评论/]);
+      state.idField = guessField(headers, [/^(id|postid|帖子id|内容id|作品id)$/i, /id/]);
+      state.platformField = guessField(headers, [/^(platform|平台|渠道|来源平台)$/i, /平台|渠道|来源/]);
+      state.accountField = guessField(headers, [/^(account|账号|账户|发布账号|账号名称)$/i, /账号|账户/]);
+
+      if (!state.dateField || !state.viewsField || !state.commentsField) {
+        throw new Error(`无法自动识别关键字段。当前识别结果：日期=${state.dateField || '未识别'}，观看量=${state.viewsField || '未识别'}，评论量=${state.commentsField || '未识别'}。请检查 CSV 表头。`);
+      }
+
+      const normalized = records
+        .map((record, idx) => {
+          const date = parseDate(record[state.dateField]);
+          if (!date) return null;
+          return {
+            idx,
+            date,
+            dateStr: formatDate(date),
+            title: state.titleField ? String(record[state.titleField] || '').trim() : `帖子 ${idx + 1}`,
+            id: state.idField ? String(record[state.idField] || '').trim() : '',
+            views: toNumber(record[state.viewsField]),
+            comments: toNumber(record[state.commentsField]),
+            platform: state.platformField ? String(record[state.platformField] || '').trim() : '',
+            account: state.accountField ? String(record[state.accountField] || '').trim() : '',
+            raw: record,
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.date - b.date || a.idx - b.idx);
+
+      if (!normalized.length) throw new Error('未解析到任何有效日期记录。');
+      return normalized;
+    }
+
+    function compareRowsHTML(curr, prev, label, formatter = formatNumber) {
+      return `
+        <tr>
+          <td>${label}</td>
+          <td class="right">${formatter(curr)}</td>
+          <td class="right">${formatDelta(curr, prev)}</td>
+        </tr>
+      `;
+    }
+
+    function fillComparisons(currentDay, previousDay, currentWeek, previousWeek, currentMonth, previousMonth) {
+      el('publishComparison').innerHTML = [
+        compareRowsHTML(currentDay.posts, previousDay.posts, '今日 vs 昨日'),
+        compareRowsHTML(currentWeek.posts, previousWeek.posts, '本周 vs 上周'),
+        compareRowsHTML(currentMonth.posts, previousMonth.posts, '本月 vs 上月'),
+      ].join('');
+
+      el('viewComparison').innerHTML = [
+        compareRowsHTML(currentDay.views, previousDay.views, '今日 vs 昨日', formatCompact),
+        compareRowsHTML(currentWeek.views, previousWeek.views, '本周 vs 上周', formatCompact),
+        compareRowsHTML(currentMonth.views, previousMonth.views, '本月 vs 上月', formatCompact),
+      ].join('');
+
+      el('commentComparison').innerHTML = [
+        compareRowsHTML(currentDay.comments, previousDay.comments, '今日 vs 昨日'),
+        compareRowsHTML(currentWeek.comments, previousWeek.comments, '本周 vs 上周'),
+        compareRowsHTML(currentMonth.comments, previousMonth.comments, '本月 vs 上月'),
+      ].join('');
+    }
+
+    function renderRankingTable(targetId, rows, metricA = 'views', metricB = 'comments') {
+      const tbody = el(targetId);
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">暂无数据</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((row, idx) => `
+        <tr>
+          <td><span class="rank-badge">${idx + 1}</span></td>
+          <td><div class="ellipsis" title="${escapeHtml(row.title || row.id || '未命名帖子')}">${escapeHtml(row.title || row.id || '未命名帖子')}</div></td>
+          <td class="right nowrap">${formatNumber(row[metricA])}</td>
+          <td class="right nowrap">${formatNumber(row[metricB])}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderLineChart(svgId, points, color, valueFormatter = formatNumber) {
+      const svg = el(svgId);
+      const width = svg.clientWidth || 400;
+      const height = svg.clientHeight || 280;
+      const pad = { top: 22, right: 18, bottom: 44, left: 44 };
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.innerHTML = '';
+
+      if (!points.length) {
+        svg.innerHTML = `<text x="20" y="40" fill="#6b7280" font-size="14">暂无数据</text>`;
+        return;
+      }
+
+      const values = points.map(p => Number(p.value || 0));
+      const max = Math.max(...values, 1);
+      const min = Math.min(...values, 0);
+      const span = Math.max(max - min, 1);
+      const chartW = width - pad.left - pad.right;
+      const chartH = height - pad.top - pad.bottom;
+
+      const toX = (i) => pad.left + (chartW * (points.length === 1 ? 0.5 : i / (points.length - 1)));
+      const toY = (v) => pad.top + chartH - ((v - min) / span) * chartH;
+
+      const gridLines = 4;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = pad.top + (chartH / gridLines) * i;
+        const val = max - (span / gridLines) * i;
+        svg.insertAdjacentHTML('beforeend', `
+          <line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#e5e7eb" stroke-width="1" />
+          <text x="${pad.left - 8}" y="${y + 4}" text-anchor="end" fill="#6b7280" font-size="11">${escapeHtml(valueFormatter(val))}</text>
+        `);
+      }
+
+      const areaPath = [];
+      const linePath = [];
+      points.forEach((p, i) => {
+        const x = toX(i);
+        const y = toY(p.value);
+        linePath.push(`${i === 0 ? 'M' : 'L'} ${x} ${y}`);
+        areaPath.push(`${i === 0 ? 'M' : 'L'} ${x} ${y}`);
+      });
+      areaPath.push(`L ${toX(points.length - 1)} ${pad.top + chartH}`);
+      areaPath.push(`L ${toX(0)} ${pad.top + chartH} Z`);
+
+      svg.insertAdjacentHTML('beforeend', `
+        <path d="${areaPath.join(' ')}" fill="${color}" opacity="0.12"></path>
+        <path d="${linePath.join(' ')}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+      `);
+
+      points.forEach((p, i) => {
+        const x = toX(i);
+        const y = toY(p.value);
+        svg.insertAdjacentHTML('beforeend', `
+          <circle cx="${x}" cy="${y}" r="4.5" fill="#fff" stroke="${color}" stroke-width="3"></circle>
+          <text x="${x}" y="${height - 16}" text-anchor="middle" fill="#6b7280" font-size="11">${escapeHtml(p.label)}</text>
+        `);
+      });
+    }
+
+
+    function aggregateByPeriod(rows, granularity = 'day') {
+      if (granularity === 'day') return aggregateByDay(rows);
+      const map = new Map();
+      for (const row of rows) {
+        const date = new Date(row.date);
+        let key = '';
+        let label = '';
+        let bucketDate = new Date(date);
+        if (granularity === 'week') {
+          bucketDate = startOfWeek(date);
+          key = formatDate(bucketDate);
+          const end = endOfWeek(date);
+          label = `${bucketDate.getMonth() + 1}/${bucketDate.getDate()}-${end.getMonth() + 1}/${end.getDate()}`;
+        } else {
+          bucketDate = new Date(date.getFullYear(), date.getMonth(), 1);
+          key = formatMonth(date);
+          label = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+        if (!map.has(key)) map.set(key, { date: bucketDate, label, posts: 0, views: 0, comments: 0, rows: [] });
+        const item = map.get(key);
+        item.posts += 1;
+        item.views += row.views;
+        item.comments += row.comments;
+        item.rows.push(row);
+      }
+      return [...map.values()].sort((a, b) => a.date - b.date);
+    }
+
+    function getFilterValue(record, field) {
+      if (!field) return '';
+      return String(record[field] ?? '').trim();
+    }
+
+    function populateFilterOptions(records) {
+      const platformSet = new Set();
+      const accountSet = new Set();
+      for (const rec of (records || [])) {
+        const p = getFilterValue(rec, state.platformField);
+        const a = getFilterValue(rec, state.accountField);
+        if (p) platformSet.add(p);
+        if (a) accountSet.add(a);
+      }
+      const platformEl = el('platformFilter');
+      const accountEl = el('accountFilter');
+      platformEl.innerHTML = `<option value="">全部平台</option>` + [...platformSet].sort().map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+      accountEl.innerHTML = `<option value="">全部账号</option>` + [...accountSet].sort().map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+      platformEl.value = state.filters.platform || '';
+      accountEl.value = state.filters.account || '';
+    }
+
+    function applyFilters(records) {
+      const { startDate, endDate, platform, account, keyword } = state.filters;
+      const kw = String(keyword || '').trim().toLowerCase();
+      return (records || []).filter(rec => {
+        const d = parseDate(rec[state.dateField]);
+        if (startDate && d && formatDate(d) < startDate) return false;
+        if (endDate && d && formatDate(d) > endDate) return false;
+        if (platform && getFilterValue(rec, state.platformField) !== platform) return false;
+        if (account && getFilterValue(rec, state.accountField) !== account) return false;
+        if (kw) {
+          const hay = [
+            rec[state.titleField] || '',
+            rec[state.idField] || '',
+            getFilterValue(rec, state.platformField),
+            getFilterValue(rec, state.accountField)
+          ].join(' ').toLowerCase();
+          if (!hay.includes(kw)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderSummary(normalized) {
+      if (!normalized.length) {
+        el('dailySummary').textContent = '当前筛选条件下暂无可生成摘要的数据。';
+        return;
+      }
+      const daily = aggregateByDay(normalized);
+      const latest = daily.slice(-1)[0];
+      const prev = daily.slice(-2, -1)[0] || { posts: 0, views: 0, comments: 0 };
+      const totalViews = normalized.reduce((s, r) => s + r.views, 0);
+      const totalComments = normalized.reduce((s, r) => s + r.comments, 0);
+      const avgViews = normalized.length ? totalViews / normalized.length : 0;
+      const avgComments = normalized.length ? totalComments / normalized.length : 0;
+      const topView = [...normalized].sort((a,b)=>b.views-a.views)[0];
+      const topComment = [...normalized].sort((a,b)=>b.comments-a.comments)[0];
+      const scope = [state.filters.startDate || '最早', state.filters.endDate || '最新'].join(' ~ ');
+      const platformText = state.filters.platform || '全部平台';
+      const accountText = state.filters.account || '全部账号';
+      el('dailySummary').textContent = `统计范围：${scope}
+平台 / 账号：${platformText} / ${accountText}
+最新统计日 ${formatDate(latest.date)} 共发布 ${formatNumber(latest.posts)} 条，观看 ${formatCompact(latest.views)}，评论 ${formatNumber(latest.comments)}；较上一统计日发布 ${percentChange(latest.posts, prev.posts).toFixed(1)}%，观看 ${percentChange(latest.views, prev.views).toFixed(1)}%，评论 ${percentChange(latest.comments, prev.comments).toFixed(1)}%。
+当前筛选范围内累计 ${formatNumber(normalized.length)} 条帖子，平均单帖观看 ${formatCompact(avgViews)}，平均单帖评论 ${avgComments.toFixed(1)}。
+观看最佳：${topView ? topView.title : '-'}（${topView ? formatCompact(topView.views) : '-'}）
+评论最佳：${topComment ? topComment.title : '-'}（${topComment ? formatNumber(topComment.comments) : '-'}）`;
+    }
+
+    function renderDashboard(normalized, sourceLabel) {
+      clearError();
+      state.filteredNormalized = normalized;
+      state.normalized = normalized;
+      state.dayStats = aggregateByDay(normalized);
+      state.latestDay = state.dayStats[state.dayStats.length - 1];
+
+      const today = state.latestDay.date;
+      const yesterdayDate = addDays(today, -1);
+      const currentDay = state.latestDay;
+      const previousDay = state.dayStats.find(d => isSameDay(d.date, yesterdayDate)) || { posts: 0, views: 0, comments: 0 };
+
+      const currentWeekStart = startOfWeek(today);
+      const currentWeekEnd = endOfWeek(today);
+      const previousWeekStart = addDays(currentWeekStart, -7);
+      const previousWeekEnd = addDays(currentWeekEnd, -7);
+
+      const currentMonthKey = formatMonth(today);
+      const prevMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const prevMonthKey = formatMonth(prevMonthDate);
+
+      const currentWeekDays = state.dayStats.filter(d => d.date >= currentWeekStart && d.date <= currentWeekEnd);
+      const previousWeekDays = state.dayStats.filter(d => d.date >= previousWeekStart && d.date <= previousWeekEnd);
+      const currentMonthDays = state.dayStats.filter(d => formatMonth(d.date) === currentMonthKey);
+      const previousMonthDays = state.dayStats.filter(d => formatMonth(d.date) === prevMonthKey);
+
+      const currentWeek = sumStats(currentWeekDays);
+      const previousWeek = sumStats(previousWeekDays);
+      const currentMonth = sumStats(currentMonthDays);
+      const previousMonth = sumStats(previousMonthDays);
+
+      const avgViews = currentDay.posts ? currentDay.views / currentDay.posts : 0;
+      const avgComments = currentDay.posts ? currentDay.comments / currentDay.posts : 0;
+
+      el('sourceText').textContent = `数据源：${sourceLabel}`;
+      el('dateText').textContent = `统计日期：${formatDate(today)}`;
+      el('recordText').textContent = `记录数：${formatNumber(normalized.length)} 条帖子`;
+
+      el('kpiPosts').textContent = formatNumber(currentDay.posts);
+      el('kpiViews').textContent = formatCompact(currentDay.views);
+      el('kpiComments').textContent = formatNumber(currentDay.comments);
+      el('kpiAvgViews').textContent = formatCompact(avgViews);
+      el('kpiAvgComments').textContent = avgComments.toFixed(1);
+
+      el('postsVsYesterday').innerHTML = `较昨日 ${formatDelta(currentDay.posts, previousDay.posts)}`;
+      el('viewsVsYesterday').innerHTML = `较昨日 ${formatDelta(currentDay.views, previousDay.views)}`;
+      el('commentsVsYesterday').innerHTML = `较昨日 ${formatDelta(currentDay.comments, previousDay.comments)}`;
+      el('avgViewsGoal').innerHTML = avgViews >= KPI_TARGETS.avgViews ? '<span class="trend-up">已达标</span>' : '<span class="trend-down">未达标</span>';
+      el('avgCommentsGoal').innerHTML = (avgComments >= KPI_TARGETS.avgCommentsMin && avgComments <= KPI_TARGETS.avgCommentsMax)
+        ? '<span class="trend-up">处于目标区间</span>'
+        : '<span class="trend-down">偏离目标区间</span>';
+
+      const achievedCount = [
+        currentDay.posts > KPI_TARGETS.posts,
+        currentDay.views > KPI_TARGETS.views,
+        currentDay.comments > KPI_TARGETS.comments,
+        avgViews >= KPI_TARGETS.avgViews,
+        avgComments >= KPI_TARGETS.avgCommentsMin && avgComments <= KPI_TARGETS.avgCommentsMax,
+      ].filter(Boolean).length;
+      const goalBadge = el('goalBadge');
+      if (achievedCount >= 4) {
+        goalBadge.className = 'badge good';
+        goalBadge.textContent = `目标完成度优秀：${achievedCount}/5 达标`;
+      } else if (achievedCount >= 2) {
+        goalBadge.className = 'badge warn';
+        goalBadge.textContent = `目标完成度一般：${achievedCount}/5 达标`;
+      } else {
+        goalBadge.className = 'badge bad';
+        goalBadge.textContent = `目标完成度偏低：${achievedCount}/5 达标`;
+      }
+
+      el('miniYesterdayPosts').textContent = formatNumber(previousDay.posts);
+      el('miniYesterdayDate').textContent = formatDate(yesterdayDate);
+      el('miniWeekPosts').textContent = formatNumber(currentWeek.posts);
+      el('miniWeekRange').textContent = `${formatDate(currentWeekStart)} ~ ${formatDate(currentWeekEnd)}`;
+      el('miniMonthPosts').textContent = formatNumber(currentMonth.posts);
+      el('miniMonthRange').textContent = `${currentMonthKey}`;
+      el('miniMonthEffect').textContent = `${formatCompact(currentMonth.views)} / ${formatNumber(currentMonth.comments)}`;
+      const monthAvgViews = currentMonth.posts ? currentMonth.views / currentMonth.posts : 0;
+      const monthAvgComments = currentMonth.posts ? currentMonth.comments / currentMonth.posts : 0;
+      el('miniMonthAvg').textContent = `月均单帖观看 ${formatCompact(monthAvgViews)}，评论 ${monthAvgComments.toFixed(1)}`;
+
+      fillComparisons(currentDay, previousDay, currentWeek, previousWeek, currentMonth, previousMonth);
+
+      const trendStats = aggregateByPeriod(normalized, state.trendGranularity);
+      const tail = trendStats.slice(state.trendGranularity === 'day' ? -7 : -6);
+      const trendTitleMap = {
+        day: ['近 7 天发布趋势', '近 7 天观看趋势', '近 7 天评论趋势'],
+        week: ['近 6 周发布趋势', '近 6 周观看趋势', '近 6 周评论趋势'],
+        month: ['近 6 月发布趋势', '近 6 月观看趋势', '近 6 月评论趋势'],
+      };
+      const titles = trendTitleMap[state.trendGranularity] || trendTitleMap.day;
+      el('postsChartTitle').textContent = titles[0];
+      el('viewsChartTitle').textContent = titles[1];
+      el('commentsChartTitle').textContent = titles[2];
+      renderLineChart('postsChart', tail.map(d => ({ label: d.label || dayLabel(d.date), value: d.posts })), '#2563eb', formatNumber);
+      renderLineChart('viewsChart', tail.map(d => ({ label: d.label || dayLabel(d.date), value: d.views })), '#059669', formatCompact);
+      renderLineChart('commentsChart', tail.map(d => ({ label: d.label || dayLabel(d.date), value: d.comments })), '#d97706', formatNumber);
+      renderSummary(normalized);
+
+      const todayRows = [...currentDay.rows];
+      const topViews = [...todayRows].sort((a, b) => b.views - a.views || b.comments - a.comments).slice(0, 10);
+      const topComments = [...todayRows].sort((a, b) => b.comments - a.comments || b.views - a.views).slice(0, 10);
+      const lowPerformers = [...todayRows].sort((a, b) => (a.views + a.comments * 100) - (b.views + b.comments * 100)).slice(0, 10);
+
+      renderRankingTable('topViewsTable', topViews, 'views', 'comments');
+      renderRankingTable('topCommentsTable', topComments, 'comments', 'views');
+      renderRankingTable('lowPerformersTable', lowPerformers, 'views', 'comments');
+    }
+
+    function recordsFromCSVText(text) {
+      const rows = parseCSV(text);
+      if (rows.length < 2) throw new Error('CSV 至少需要包含表头和 1 行数据。');
+      const headers = rows[0].map(h => String(h || '').trim());
+      const records = rows.slice(1).map((cells) => {
+        const record = {};
+        headers.forEach((header, idx) => { record[header] = cells[idx] ?? ''; });
+        return record;
+      });
+      return { headers, records };
+    }
+
+    function getModel(modelKey) {
+      return MODELS.find(m => m.key === modelKey) || MODELS.find(m => m.key === DEFAULT_MODEL_KEY) || MODELS[0];
+    }
+
+    function escapeCSVCell(value) {
+      const s = value == null ? '' : String(value);
+      // CSV 标准：包含逗号、引号、换行时需要包裹并转义双引号
+      if (/[",\r\n]/.test(s)) return `"${s.replaceAll('"', '""')}"`;
+      return s;
+    }
+
+    function buildCSV(headers, records) {
+      const safeHeaders = (headers && headers.length) ? headers : (records?.[0] ? Object.keys(records[0]) : []);
+      const lines = [];
+      lines.push(safeHeaders.map(escapeCSVCell).join(','));
+      for (const rec of (records || [])) {
+        lines.push(safeHeaders.map(h => escapeCSVCell(rec[h] ?? '')).join(','));
+      }
+      return lines.join('\n');
+    }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function saveModelToLocalStorage(modelKey, headers, records, csvText) {
+      try {
+        localStorage.setItem(`${STORAGE_PREFIX}${modelKey}:headers`, JSON.stringify(headers));
+        localStorage.setItem(`${STORAGE_PREFIX}${modelKey}:records`, JSON.stringify(records));
+        localStorage.setItem(`${STORAGE_PREFIX}${modelKey}:csvText`, csvText);
+      } catch {
+        // localStorage 可能被禁用；此时仍保留页面内状态，不影响看板渲染
+      }
+    }
+
+    function loadModelFromLocalStorage(modelKey) {
+      try {
+        const headers = JSON.parse(localStorage.getItem(`${STORAGE_PREFIX}${modelKey}:headers`) || '[]');
+        const records = JSON.parse(localStorage.getItem(`${STORAGE_PREFIX}${modelKey}:records`) || '[]');
+        const csvText = localStorage.getItem(`${STORAGE_PREFIX}${modelKey}:csvText`) || null;
+        if (records && records.length) return { headers, records, csvText };
+      } catch {
+        // ignore
+      }
+      return null;
+    }
+
+    function syncFilterUI() {
+      el('startDateInput').value = state.filters.startDate || '';
+      el('endDateInput').value = state.filters.endDate || '';
+      el('keywordFilter').value = state.filters.keyword || '';
+      el('trendGranularity').value = state.trendGranularity || 'day';
+      populateFilterOptions(state.originalRecords || []);
+    }
+
+    function rerenderActiveView(sourceLabelOverride = null) {
+      const filteredRecords = applyFilters(state.originalRecords || []);
+      state.filteredRecords = filteredRecords;
+      const basis = filteredRecords.length ? filteredRecords : (state.originalRecords || []);
+      const normalized = normalizeData(basis);
+      const currentSource = sourceLabelOverride || (el('sourceText').textContent.replace(/^数据源：/, '') || '当前数据');
+      renderDashboard(normalized, currentSource);
+      el('recordText').textContent = `记录数：${formatNumber(filteredRecords.length)} / ${formatNumber((state.originalRecords || []).length)} 条帖子`;
+    }
+
+    function renderFromRecords(modelKey, headers, records, sourceLabel, csvTextForExport = null) {
+      state.activeModelKey = modelKey;
+      state.originalHeaders = headers || [];
+      state.originalRecords = records || [];
+      state.originalCSVText = csvTextForExport;
+      syncFilterUI();
+      rerenderActiveView(sourceLabel);
+    }
+
+    function getTemplateCSVForModel(modelKey) {
+      return getModel(modelKey).templateCSV;
+    }
+
+    function getTemplateData(modelKey) {
+      const m = getModel(modelKey);
+      const csvText = getTemplateCSVForModel(modelKey);
+      const parsed = recordsFromCSVText(csvText);
+      return {
+        modelKey,
+        headers: parsed.headers,
+        records: parsed.records,
+        csvText,
+        sourceLabel: `内置示例（${m.label}）`,
+      };
+    }
+
+    async function getRelativeData(modelKey) {
+      const m = getModel(modelKey);
+      const response = await fetch(m.relativeCSVPath);
+      if (!response.ok) throw new Error(`读取 ${m.relativeCSVPath} 失败：HTTP ${response.status}`);
+      const csvText = await response.text();
+      const parsed = recordsFromCSVText(csvText);
+      return { modelKey, headers: parsed.headers, records: parsed.records, csvText, sourceLabel: m.relativeCSVPath };
+    }
+
+    function getLocalSavedData(modelKey) {
+      const saved = loadModelFromLocalStorage(modelKey);
+      if (!saved) return null;
+      return {
+        modelKey,
+        headers: saved.headers,
+        records: saved.records,
+        csvText: saved.csvText,
+        sourceLabel: `本地保存（${getModel(modelKey).label}）`,
+      };
+    }
+
+    async function resolveActiveData(modelKey, { preferRelative = true } = {}) {
+      // 始终可用：模板数据（用于“默认值/兜底”）
+      const templateData = getTemplateData(modelKey);
+      if (!preferRelative) return { ...templateData, used: 'template' };
+
+      // 优先相对路径 -> 失败则 localStorage -> 仍失败则模板，并把错误抛出去用于提示
+      try {
+        const relative = await getRelativeData(modelKey);
+        return { ...relative, used: 'relative' };
+      } catch (err) {
+        const saved = getLocalSavedData(modelKey);
+        if (saved) return { ...saved, used: 'local' };
+        throw err; // 调用方会显示错误，同时页面仍已经渲染了模板兜底
+      }
+    }
+
+    function syncModelUI(modelKey) {
+      const m = getModel(modelKey);
+      el('modelText').textContent = `模型：${m.label}`;
+      el('reloadBtn').textContent = `重新读取 ${m.relativeCSVPath}`;
+      el('fileInput').value = '';
+    }
+
+    async function refreshActiveModel({ preferRelative = true } = {}) {
+      clearError();
+
+      const modelKey = state.activeModelKey;
+      syncModelUI(modelKey);
+
+      // 先渲染模板兜底（保证页面不出现一堆 '-'）
+      const templateData = getTemplateData(modelKey);
+      renderFromRecords(templateData.modelKey, templateData.headers, templateData.records, templateData.sourceLabel, templateData.csvText);
+
+      // 再尝试加载真实数据，并把“数据-渲染-保存”串成闭环
+      try {
+        const resolved = await resolveActiveData(modelKey, { preferRelative });
+        renderFromRecords(resolved.modelKey, resolved.headers, resolved.records, resolved.sourceLabel, resolved.csvText);
+        if (resolved.used === 'relative') {
+          saveModelToLocalStorage(resolved.modelKey, resolved.headers, resolved.records, resolved.csvText);
+        }
+      } catch (err) {
+        // 只有相对路径也失败且本地没有保存时才提示；模板已渲染，不会让看板空白
+        setError(err.message || '初始化加载失败。已使用内置示例数据。');
+      }
+    }
+
+    async function handleFile(file) {
+      const text = await file.text();
+      const parsed = recordsFromCSVText(text);
+      const modelKey = state.activeModelKey;
+      renderFromRecords(modelKey, parsed.headers, parsed.records, `上传：${file.name}`, text);
+      saveModelToLocalStorage(modelKey, parsed.headers, parsed.records, text);
+    }
+
+    el('reloadBtn').addEventListener('click', async () => {
+      try {
+        await refreshActiveModel({ preferRelative: true });
+      } catch (err) {
+        setError(err.message || '读取相对路径 CSV 失败。');
+      }
+    });
+
+    el('fileInput').addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        await handleFile(file);
+      } catch (err) {
+        setError(err.message || '上传的 CSV 无法解析。');
+      }
+    });
+
+    el('modelSelect').addEventListener('change', async (event) => {
+      state.activeModelKey = event.target.value || DEFAULT_MODEL_KEY;
+      localStorage.setItem(`${STORAGE_PREFIX}activeModelKey`, state.activeModelKey);
+      await refreshActiveModel({ preferRelative: true });
+    });
+
+    el('downloadTemplateBtn').addEventListener('click', () => {
+      const m = getModel(state.activeModelKey);
+      const filename = m.relativeCSVPath.split('/').pop() || `template_${m.key}.csv`;
+      downloadText(filename, getTemplateCSVForModel(state.activeModelKey));
+    });
+
+    el('exportCSVBtn').addEventListener('click', () => {
+      const headers = state.originalHeaders && state.originalHeaders.length ? state.originalHeaders : (state.originalRecords?.[0] ? Object.keys(state.originalRecords[0]) : []);
+      const exportRecords = state.filteredRecords && state.filteredRecords.length ? state.filteredRecords : state.originalRecords;
+      const csvText = buildCSV(headers, exportRecords);
+      const m = getModel(state.activeModelKey);
+      const filename = `导出_${m.key}_${formatDate(state.latestDay?.date || new Date())}.csv`;
+      downloadText(filename, csvText);
+    });
+
+    el('applyFilterBtn').addEventListener('click', () => {
+      state.filters.startDate = el('startDateInput').value || '';
+      state.filters.endDate = el('endDateInput').value || '';
+      state.filters.platform = el('platformFilter').value || '';
+      state.filters.account = el('accountFilter').value || '';
+      state.filters.keyword = el('keywordFilter').value || '';
+      rerenderActiveView();
+    });
+
+    el('resetFilterBtn').addEventListener('click', () => {
+      state.filters = { startDate: '', endDate: '', platform: '', account: '', keyword: '' };
+      syncFilterUI();
+      rerenderActiveView();
+    });
+
+    el('trendGranularity').addEventListener('change', (event) => {
+      state.trendGranularity = event.target.value || 'day';
+      rerenderActiveView();
+    });
+
+    el('platformFilter').addEventListener('change', () => {
+      state.filters.platform = el('platformFilter').value || '';
+      rerenderActiveView();
+    });
+
+    el('accountFilter').addEventListener('change', () => {
+      state.filters.account = el('accountFilter').value || '';
+      rerenderActiveView();
+    });
+
+    el('clearModelBtn').addEventListener('click', () => {
+      try {
+        localStorage.removeItem(`${STORAGE_PREFIX}${state.activeModelKey}:headers`);
+        localStorage.removeItem(`${STORAGE_PREFIX}${state.activeModelKey}:records`);
+        localStorage.removeItem(`${STORAGE_PREFIX}${state.activeModelKey}:csvText`);
+      } catch {
+        // ignore
+      }
+      // 清空后重新加载相对路径（失败就回到内置示例）
+      refreshActiveModel({ preferRelative: true });
+    });
+
+    window.addEventListener('load', async () => {
+      // 初始化模型下拉
+      const select = el('modelSelect');
+      select.innerHTML = MODELS.map(m => `<option value="${escapeHtml(m.key)}">${escapeHtml(m.label)}</option>`).join('');
+
+      const savedModelKey = localStorage.getItem(`${STORAGE_PREFIX}activeModelKey`) || DEFAULT_MODEL_KEY;
+      state.activeModelKey = MODELS.some(m => m.key === savedModelKey) ? savedModelKey : DEFAULT_MODEL_KEY;
+      select.value = state.activeModelKey;
+
+      try {
+        await refreshActiveModel({ preferRelative: true });
+      } catch (err) {
+        setError(err.message || '初始化加载失败。');
+        el('sourceText').textContent = '数据源：未加载';
+        el('dateText').textContent = '统计日期：-';
+        el('recordText').textContent = '记录数：-';
+      }
+    });
+  </script>
+</body>
+</html>
